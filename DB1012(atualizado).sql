@@ -1,5 +1,7 @@
 create database AtividadeAvaliativa1012;
 use AtividadeAvaliativa1012;
+/*questão 1*/
+
 create table paciente (
 codPaciente int not null auto_increment unique,
 nomePaciente varchar(45),
@@ -72,6 +74,7 @@ constraint fkcodSolicitacao foreign key (codSolicitacao) references solicitacao_
 constraint fkcodUnidade foreign key (codUnidade) references unidade (codUnidade));
 
 
+/*questão 2*/
 
 insert into paciente (codPaciente, nomePaciente, dataNascimento, convenio) values (1, "Alisson", '2006-08-18', "SUS");
 insert into paciente (codPaciente, nomePaciente, dataNascimento, convenio) values (2, "Mariana", '2004-03-12', "Unimed");
@@ -247,17 +250,22 @@ insert into convenio (nomeConvenio, cnpj, descontoPadrao) values ("SulAmérica R
 insert into convenio (nomeConvenio, cnpj, descontoPadrao) values ("NotreDame SP", "99.012.345/0001-56", 12.0);
 insert into convenio (nomeConvenio, cnpj, descontoPadrao) values ("Golden Cross MG", "10.123.456/0001-78", 7.5);
 
+/*questão 3*/
+
 alter table tipo_Exame add column tempoJejum int;
 
+
+/*desabilitar medidas de segurança*/
 set sql_safe_updates = 0;
 
+/*questão 4*/
 UPDATE tipo_Exame SET valorBase = valorBase * 1.15 WHERE setor = 'Hematologia' AND valorBase < 50.00;
 
 
+
+/*questão 5*/
 DELETE FROM resultado_exame
 WHERE codSolicitacao IN ( SELECT codSolicitacao FROM solicitacao_exame WHERE codConsulta IN ( SELECT codConsulta FROM consulta WHERE crm IN ( SELECT crm FROM medico WHERE especialidade = 'Clínico Geral'OR crm LIKE 'J%')));
-
-
 
 DELETE FROM solicitacao_exame
 WHERE codConsulta IN (SELECT codConsulta FROM consulta WHERE crm IN ( SELECT crm FROM medico WHERE especialidade = 'Clínico Geral' OR crm LIKE 'J%'));
@@ -266,6 +274,8 @@ DELETE FROM consulta
 WHERE crm IN (SELECT crm FROM medico WHERE especialidade = 'Clínico Geral' OR crm LIKE 'J%');
 
 DELETE FROM medico WHERE especialidade = 'Clínico Geral' OR crm LIKE 'J%';
+
+
 
 /*questão 6*/
 SELECT crm AS RegistroProfissional, nomeMedico FROM medico ORDER BY especialidade DESC;
@@ -342,6 +352,7 @@ WHERE s.statusExame IN ('Liberado', 'Em Análise') ORDER BY c.dataConsulta DESC;
 
 
 
+/*questão 21*/
 
 SELECT p.nomePaciente, te.nomeExame, m.nomeMedico FROM paciente p
  INNER JOIN consulta c ON p.codPaciente = c.codPaciente INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta
@@ -349,40 +360,49 @@ INNER JOIN tipo_exame te ON se.codExame = te.codExame INNER JOIN medico m ON c.c
 WHERE p.nomePaciente NOT LIKE '%Silva%' OR m.nomeMedico NOT LIKE '%Dr.%';
 
 
+/*questão 22*/
 
 SELECT te.setor, SUM(te.valorBase) AS ReceitaEstimada FROM tipo_exame te GROUP BY te.setor;
 
+/*questão 23*/
 
 SELECT p.nomePaciente, m.nomeMedico, c.dataConsulta, m.especialidade FROM paciente p
 INNER JOIN consulta c ON p.codPaciente = c.codPaciente INNER JOIN medico m ON c.crm = m.crm
 ORDER BY m.especialidade ASC, c.dataConsulta DESC;
 
+/*questão 24*/
 SELECT p.nomePaciente, m.nomeMedico, p.convenio FROM paciente p INNER JOIN consulta c ON p.codPaciente = c.codPaciente
 INNER JOIN medico m ON c.crm = m.crm WHERE p.convenio = 'Unimed' AND m.especialidade = 'Pediatria';
 
-
+/*questão 25*/
 SELECT te.setor, COUNT(DISTINCT te.nomeExame) AS TiposDistintos FROM tipo_exame te GROUP BY te.setor;
 
 
+/*questão 26*/
 SELECT p.nomePaciente, u.nomeUnidade FROM paciente p
 INNER JOIN consulta c ON p.codPaciente = c.codPaciente INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta
 INNER JOIN resultado_exame r ON se.codSolicitacao = r.codSolicitacao INNER JOIN unidade u ON r.codUnidade = u.codUnidade
 WHERE p.dataNascimento NOT BETWEEN '1970-01-01' AND '1979-12-31'AND r.dataLiberacao > '2025-11-01';
 
+
+/*questão 27*/
 SELECT p.nomePaciente, te.nomeExame FROM paciente p 
 INNER JOIN consulta c ON p.codPaciente = c.codPaciente INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta 
 INNER JOIN tipo_exame te ON se.codExame = te.codExame WHERE te.nomeExame LIKE 'T%' OR p.nomePaciente LIKE '%Ferreira%';
 
 
+/*questão 28*/
 SELECT p.convenio, AVG(te.valorBase) AS ValorMedio FROM paciente p INNER JOIN consulta c ON p.codPaciente = c.codPaciente
 INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta INNER JOIN tipo_exame te ON se.codExame = te.codExame GROUP BY p.convenio;
 
 
+/*questão 29*/
 SELECT m.nomeMedico, u.nomeUnidade, r.dataLiberacao FROM medico m INNER JOIN consulta c ON m.crm = c.crm
 INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta INNER JOIN resultado_exame r ON se.codSolicitacao = r.codSolicitacao
 INNER JOIN unidade u ON r.codUnidade = u.codUnidade WHERE u.codUnidade IN (1, 5, 10) AND m.especialidade IN ('Neurologia', 'Oftalmologia');
 
 
+/*questão 30*/
 SELECT p.nomePaciente, m.nomeMedico, p.convenio, te.nomeExame FROM paciente p
 INNER JOIN consulta c ON p.codPaciente = c.codPaciente INNER JOIN medico m ON c.crm = m.crm
 INNER JOIN solicitacao_exame se ON c.codConsulta = se.codConsulta INNER JOIN tipo_exame te ON se.codExame = te.codExame WHERE p.convenio = 'SUS' OR te.nomeExame = 'Eletrocardiograma';
